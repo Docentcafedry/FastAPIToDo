@@ -1,5 +1,8 @@
 from pydantic import BaseModel, Field, EmailStr
+from typing import Optional
 
+class ChangeUserNumber(BaseModel):
+    number: str
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -9,6 +12,7 @@ class UserCreate(BaseModel):
     password: str
     role: str
     is_active: bool = Field(default=True)
+    number: Optional[str] = None
 
 
 class UserPasswordChange(BaseModel):

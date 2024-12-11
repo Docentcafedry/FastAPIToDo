@@ -1,6 +1,11 @@
-from database import Base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Boolean, Integer, ForeignKey
+from typing import Optional
+
+
+
+Base = declarative_base()
 
 
 class User(Base):
@@ -13,6 +18,7 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String())
     is_active: Mapped[bool] = mapped_column(default=True)
     role: Mapped[str] = mapped_column(String())
+    number: Mapped[Optional[str]] = mapped_column(default=None)
 
 
 class Todo(Base):

@@ -10,7 +10,7 @@ engine = create_engine(f'postgresql+psycopg2://{os.getenv("POSTGRES_USER")}:{os.
 
 session = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-Base = declarative_base()
+
 
 
 def get_db_connection():
