@@ -19,7 +19,7 @@ async def get_todos(db: db_connection, current_user: current_user_dependency):
 
 @router.get("/todos/{todo_id}", status_code=status.HTTP_200_OK)
 async def get_todo_by_id(db: db_connection, current_user: current_user_dependency, todo_id: int = Path(gt=0)):
-    if current_user.role != "admin":
+    if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="You have no rights to browse this resource")
     todo = db.scalar(select(Todo).where(Todo.id == todo_id))
     if not todo:
@@ -29,7 +29,7 @@ async def get_todo_by_id(db: db_connection, current_user: current_user_dependenc
 
 @router.put("/todos/update/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def update_todo_by_idt(todo: TodoUpdate, db: db_connection, current_user: current_user_dependency, todo_id: int = Path(gt=0)):
-    if current_user.role != "admin":
+    if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="You have no rights to browse this resource")
     todo_db: Todo = db.scalar(select(Todo).where(Todo.id == todo_id))
     if not todo_db:
@@ -45,7 +45,7 @@ async def update_todo_by_idt(todo: TodoUpdate, db: db_connection, current_user: 
 
 @router.delete('/todos/delete/{todo_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_todo_by_id(db: db_connection, current_user: current_user_dependency, todo_id: int = Path(gt=0)):
-    if current_user.role != "admin":
+    if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="You have no rights to browse this resource")
     todo_db: Todo = db.scalar(select(Todo).where(Todo.id == todo_id))
     if not todo_db:

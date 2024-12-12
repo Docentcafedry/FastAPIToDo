@@ -48,16 +48,16 @@ async def auth_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],d
     return Token(access_token=access_token, token_type="bearer")
 
 
-@router.get("/users/me")
+@router.get("/users/me", status_code=status.HTTP_200_OK)
 async def get_current_user(current_user: current_user_dependency):
     return current_user
 
 
-@router.post("/users/change_password", status_code=status.HTTP_201_CREATED)
+@router.patch("/users/change_password", status_code=status.HTTP_204_NO_CONTENT)
 async def change_current_password(db: db_connection, current_user: current_user_dependency, form_data: UserPasswordChange):
     if not form_data.new_password == form_data.confirm_new_password:
         raise HTTPException(status_code=400, detail="Passwords should match")
-    user = user = db.scalar(select(User).where(User.username == current_user.username))
+    user = user = db.scalar(select(User).where(User.username == current_user["username"]))
     hashed_password = pwd_context.hash(form_data.new_password)
     user.hashed_password = hashed_password
     db.add(user)
