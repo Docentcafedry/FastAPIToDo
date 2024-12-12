@@ -3,6 +3,8 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from database import get_db_connection
 from depends.auth import get_current_user
 from depends.db import db_connection
 from main import app
@@ -11,6 +13,7 @@ from typing import Annotated
 from models import Base
 import random
 import string
+from sqlalchemy import text
 
 
 client = TestClient(app)
@@ -42,9 +45,9 @@ def current_user_dep_replacement():
 
 
 app.dependency_overrides[get_current_user] = current_user_dep_replacement
-app.dependency_overrides[db_connection] = get_db_connection_test
+app.dependency_overrides[get_db_connection] = get_db_connection_test
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def session():
     session = session_test()
     yield session
@@ -53,7 +56,7 @@ def session():
 
     # truncate all tables
     for table in reversed(Base.metadata.sorted_tables):
-        session.execute(f'TRUNCATE {table.name} CASCADE;')
+        session.execute(text(f'DELETE FROM {table.name};'))
         session.commit()
 
     session.close()

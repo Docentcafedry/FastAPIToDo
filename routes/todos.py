@@ -12,7 +12,7 @@ router = APIRouter(prefix='/todos', tags=['todos'])
 
 @router.get("/", status_code=status.HTTP_200_OK)
 async def get_todos(db: db_connection, current_user: current_user_dependency):
-    todos = db.scalars(select(Todo).filter(Todo.owner_id == current_user.id).order_by(Todo.id)).all()
+    todos = db.scalars(select(Todo).filter(Todo.owner_id == current_user["id"]).order_by(Todo.id)).all()
     return todos
 
 

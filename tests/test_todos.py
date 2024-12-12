@@ -1,42 +1,28 @@
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from depends.auth import current_user_dependency
-from depends.db import db_connection
-from main import app
-from fastapi import Depends
-from typing import Annotated
-from schemas import UserCreate
-
-client = TestClient(app)
-
-engine_test = create_engine("sqlite:///./test.db")
-
-session_test = sessionmaker(bind=engine_test, autoflush=False, autocommit=False)
+from .conftest import client, get_random_string
 
 
-def get_db_connection_test():
-    db = session_test()
-    try:
-        yield db
-    finally:
-        db.close()
+def test_get_todos(session):
+    user_create_response = client.post(
+        "/auth/signup",
+        json=
+            {
+                "email": "user1@example.com",
+                "username": "string1",
+                "first_name": "string",
+                "last_name": "string",
+                "password": "string",
+                "role": "string",
+                "is_active": True,
+                "number": "string",
+            }
 
-
-def current_user_dep_replacement():
-    return {"id": 1, "username": "user", "role": "admin"}
-
-
-current_user_dependency_test = Annotated[dict, Depends(current_user_dep_replacement)]
-
-app.dependency_overrides[current_user_dependency] = current_user_dependency_test
-app.dependency_overrides[db_connection] = get_db_connection_test
-
-
-def test_get_todos():
-    response = client.get("/todos")
+    )
+    assert user_create_response.status_code == 201
+    user_obtain_jwt = client.post("/auth/token", data={"username": "string1", "password": "string"})
+    assert user_obtain_jwt.status_code == 201
+    response = client.get(f"/todos/?token={user_obtain_jwt.json()['access_token']}")
+    print(response)
     assert response.status_code == 200
-    assert response.json() == {}
+    assert response.json() == []
 
 

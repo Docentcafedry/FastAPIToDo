@@ -34,12 +34,12 @@ async def get_current_user(token: Annotated[str, oauth2_scheme],db: Annotated[Se
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"})
-    return user
+    return {"id": user.id, "username": user.username, "role": user.role, "is_active": user.is_active}
 
 
 async def get_current_active_user(current_user: Annotated[User, Depends(get_current_user)]):
-    if not current_user.is_active:
+    if not current_user["is_active"]:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
-current_user_dependency = Annotated[User, Depends(get_current_user)]
+current_user_dependency = Annotated[dict, Depends(get_current_active_user)]
