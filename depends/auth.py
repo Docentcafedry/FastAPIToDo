@@ -13,6 +13,19 @@ from models import User
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
+async def get_current_user_from_token(token, db: Annotated[Session, Depends(get_db_connection)] ):
+    try:
+        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=[os.getenv('ALGORITHM')])
+        username: str = payload.get('username')
+    except InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"})
+    user = db.scalar(select(User).where(User.username == username))
+    return user
+
+
 async def get_current_user(token: Annotated[str, oauth2_scheme],db: Annotated[Session, Depends(get_db_connection)] ):
     try:
         payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=[os.getenv('ALGORITHM')])

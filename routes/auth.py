@@ -1,7 +1,8 @@
 import os
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from typing import Annotated
+from starlette.responses import HTMLResponse
 from models import User
 from depends.db import db_connection
 from passlib.context import CryptContext
@@ -13,12 +14,26 @@ from features.jwt_features import create_access_token
 from starlette import status
 from schemas import UserCreate, UserPasswordChange
 from depends.auth import current_user_dependency
+from fastapi.templating import Jinja2Templates
+
 
 load_dotenv()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 router = APIRouter(prefix='/auth', tags=["auth"])
+
+templates = Jinja2Templates(directory="templates")
+
+
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse(request=request, name='login.html', context={"title": "Log in"})
+
+
+@router.get("/register", response_class=HTMLResponse)
+async def main_page(request: Request):
+    return templates.TemplateResponse(request=request, name='register.html', context={"title": "Registration"})
 
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
