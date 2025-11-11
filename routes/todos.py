@@ -20,6 +20,27 @@ def redirect_to_login():
     return redirect_response
 
 
+
+@router.get("/change/{todo_id}", response_class=HTMLResponse)
+async def change_todo_page(request: Request, db: db_connection, todo_id: int = Path(gt=0)):
+    try:
+        access_token = request.cookies.get("access_token")
+        user = await get_current_user_from_token(access_token, db)
+
+        if not user:
+            redirect_to_login()
+        todo = db.scalar(select(Todo).where(Todo.id == todo_id).where(Todo.owner_id == user.id))
+        return templates.TemplateResponse(request=request, name='change_todo.html', context={"title": "Update Todo", "todo": todo})
+    except:
+        redirect_to_login()
+    return templates.TemplateResponse(request=request, name='change_todo.html',
+                                      context={"title": "Update Todo", "todo": todo})
+
+
+@router.get("/todos/create", response_class=HTMLResponse)
+async def todos_page(request: Request):
+    return templates.TemplateResponse(request=request, name='add_todo.html', context={"title": "Create Todo"})
+
 @router.get("/todos", response_class=HTMLResponse)
 async def todos_page(request: Request, db: db_connection):
     try:
@@ -30,11 +51,11 @@ async def todos_page(request: Request, db: db_connection):
             redirect_to_login()
         todos = db.query(Todo).filter(Todo.owner_id == user.id).all()
         print(todos)
-        return templates.TemplateResponse(request=request, name='todo.html', context={"title": "Todos", "todos": todos})
+        return templates.TemplateResponse(request=request, name='todo.html', context={"title": "Todos", "todos": todos, "logout": True})
     except:
         redirect_to_login()
-    return templates.TemplateResponse(request=request, name='todo.html', context={"title": "Todos", "todos": todos})
-
+    # return templates.TemplateResponse(request=request, name='todo.html', context={"title": "Todos", "todos": todos})
+    return "hello"
 @router.get("/", status_code=status.HTTP_200_OK)
 async def get_todos(db: db_connection, current_user: current_user_dependency):
     todos = db.scalars(select(Todo).filter(Todo.owner_id == current_user["id"]).order_by(Todo.id)).all()

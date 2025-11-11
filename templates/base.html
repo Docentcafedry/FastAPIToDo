@@ -7,6 +7,13 @@
     <title>{{ title }}</title>
 </head>
 <body>
+
+{% if logout == True %}
+                <div class="button-danger">
+                    <button type="button" id="logoutButton" class="btn btn-outline-danger">Logout</button>
+                </div>
+{% endif %}
+
     {% block content %}
 
     {% endblock %}

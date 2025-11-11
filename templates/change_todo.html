@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">Register</div>
+        <div class="card-body">
+            <form id="editTodoForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control" name="title" value={{todo.name}}>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" name="description">{{todo.description}}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select class="form-control" name="priority">
+                        <option {% if todo.priority == 1 %} selected {% endif %}>1</option>
+                        <option {% if todo.priority == 2 %} selected {% endif %}>2</option>
+                        <option {% if todo.priority == 3 %} selected {% endif %}>3</option>
+                        <option {% if todo.priority == 4 %} selected {% endif %}>4</option>
+                        <option {% if todo.priority == 5 %} selected {% endif %}>5</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="d-block" for="complete">Complete</label>
+                    <input class="form-control w-auto d-inline" type="checkbox" id="complete" name="complete" {% if todo.is_done %} checked {% endif %} >
+
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <button class="btn btn-danger" id="deleteButton">Delete</button>
+            </form>
+            <div class="card-footer">
+                <a href="/todos/todos" class="btn btn-primary">Back</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -24,27 +24,28 @@
                 </thead>
                 <tbody>
                 {% for todo in todos %}
-                {% if todo.complete == False %}
+                {% if todo.is_done == False %}
                 <tr class="pointer">
                     <td>{{loop.index}}</td>
-                    <td>{{todo.title}}</td>
+                    <td>{{todo.name}}</td>
                     <td>
-                        <button onclick="window.location.href='edit-todo-page/{{todo.id}}'" class="btn btn-info" type="button"></button>
+                        <button onclick="window.location.href='/todos/change/{{todo.id}}'" class="btn btn-info" type="button">Edit</button>
+
                     </td>
                 </tr>
                 {% else %}
                 <tr class="pointer alert alert-success">
                     <td>{{loop.index}}</td>
-                    <td class="strike-through-td">{{todo.title}}</td>
+                    <td class="strike-through-td">{{todo.name}}</td>
                     <td>
-                        <button onclick="window.location.href='edit-todo-page/{{todo.id}}'" class="btn btn-info" type="button"></button>
+                        <button onclick="window.location.href='/todos/change/{{todo.id}}'" class="btn btn-info" type="button">Edit</button>
                     </td>
                 </tr>
                 {% endif %}
                 {% endfor %}
                 </tbody>
             </table>
-            <a href="/todos/add-todo" class="btn btn-primary">Add a new todo!</a>
+            <a href="/todos/todos/create" class="btn btn-primary">Add a new todo!</a>
         </div>
     </div>
 </div>

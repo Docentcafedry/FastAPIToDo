@@ -9,14 +9,16 @@
             const data = Object.fromEntries(formData.entries());
 
             const payload = {
-                title: data.title,
+                name: data.title,
                 description: data.description,
                 priority: parseInt(data.priority),
-                complete: false
+                is_done: false
             };
 
+
+
             try {
-                const response = await fetch('/todos/todo', {
+                const response = await fetch(`/todos/create/?token=${getCookie('access_token')}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -27,9 +29,11 @@
 
                 if (response.ok) {
                     form.reset(); // Clear the form
+                    window.location.href = '/todos/todos'
                 } else {
                     // Handle error
                     const errorData = await response.json();
+                    console.log(`${errorData}`)
                     alert(`Error: ${errorData.detail}`);
                 }
             } catch (error) {
@@ -44,18 +48,22 @@
     if (editTodoForm) {
         editTodoForm.addEventListener('submit', async function (event) {
         event.preventDefault();
+        event.stopPropagation()
         const form = event.target;
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         var url = window.location.pathname;
         const todoId = url.substring(url.lastIndexOf('/') + 1);
 
+
         const payload = {
-            title: data.title,
+            name: data.title,
             description: data.description,
             priority: parseInt(data.priority),
-            complete: data.complete === "on"
+            is_done: data.complete === "on"
         };
+
+        console.log(payload)
 
         try {
             const token = getCookie('access_token');
@@ -66,7 +74,7 @@
 
             console.log(`${todoId}`)
 
-            const response = await fetch(`/todos/todo/${todoId}`, {
+            const response = await fetch(`/todos/update/${todoId}/?token=${getCookie('access_token')}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -76,7 +84,7 @@
             });
 
             if (response.ok) {
-                window.location.href = '/todos/todo-page'; // Redirect to the todo page
+                window.location.href = '/todos/todos'; // Redirect to the todo page
             } else {
                 // Handle error
                 const errorData = await response.json();
@@ -88,9 +96,11 @@
         }
     });
 
-        document.getElementById('deleteButton').addEventListener('click', async function () {
+        document.getElementById('deleteButton').addEventListener('click', async function (event) {
             var url = window.location.pathname;
             const todoId = url.substring(url.lastIndexOf('/') + 1);
+
+            event.stopPropagation()
 
             try {
                 const token = getCookie('access_token');
@@ -98,7 +108,7 @@
                     throw new Error('Authentication token not found');
                 }
 
-                const response = await fetch(`/todos/todo/${todoId}`, {
+                const response = await fetch(`/todos/delete/${todoId}/?token=${getCookie('access_token')}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -214,6 +224,8 @@
     }
 
 
+    const logOutButton = document.getElementById('logoutButton');
+    logOutButton.addEventListener("click", logout)
 
 
 
@@ -247,5 +259,6 @@
         }
     
         // Redirect to the login page
-        window.location.href = '/auth/login-page';
+        window.location.href = '/auth/login';
     };
+
