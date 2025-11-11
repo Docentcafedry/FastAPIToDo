@@ -15,16 +15,14 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
+
 @app.get("/", response_class=HTMLResponse)
 async def main_page(request: Request):
     return RedirectResponse("/todos/todos", status_code=status.HTTP_302_FOUND)
     # return "application"
 
 
-
 app.include_router(users_router)
 app.include_router(auth_router)
 app.include_router(todo_router)
 app.include_router(admin_router)
-
-

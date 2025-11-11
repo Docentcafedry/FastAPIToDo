@@ -9,18 +9,18 @@
 <body>
 
 {% if logout == True %}
-                <div class="button-danger">
-                    <button type="button" id="logoutButton" class="btn btn-outline-danger">Logout</button>
-                </div>
+<div class="button-danger">
+    <button type="button" id="logoutButton" class="btn btn-outline-danger">Logout</button>
+</div>
 {% endif %}
 
-    {% block content %}
+{% block content %}
 
-    {% endblock %}
+{% endblock %}
 
-    <script src="{{ url_for('static', path='/js/jquery-slim.js') }}"></script>
-    <script src="{{ url_for('static', path='/js/popper.js') }}"></script>
-    <script src="{{ url_for('static', path='/js/bootstrap.js') }}"></script>
-    <script src="{{ url_for('static', path='/js/base.js') }}" defer></script>
+<script src="{{ url_for('static', path='/js/jquery-slim.js') }}"></script>
+<script src="{{ url_for('static', path='/js/popper.js') }}"></script>
+<script src="{{ url_for('static', path='/js/bootstrap.js') }}"></script>
+<script src="{{ url_for('static', path='/js/base.js') }}" defer></script>
 </body>
 </html>

@@ -13,46 +13,67 @@ from models import User
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
-async def get_current_user_from_token(token, db: Annotated[Session, Depends(get_db_connection)] ):
+async def get_current_user_from_token(
+    token, db: Annotated[Session, Depends(get_db_connection)]
+):
     try:
-        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=[os.getenv('ALGORITHM')])
-        username: str = payload.get('username')
+        payload = jwt.decode(
+            token, os.getenv("SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")]
+        )
+        username: str = payload.get("username")
     except InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"})
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     user = db.scalar(select(User).where(User.username == username))
     return user
 
 
-async def get_current_user(token: Annotated[str, oauth2_scheme],db: Annotated[Session, Depends(get_db_connection)] ):
+async def get_current_user(
+    token: Annotated[str, oauth2_scheme],
+    db: Annotated[Session, Depends(get_db_connection)],
+):
     try:
-        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=[os.getenv('ALGORITHM')])
-        username: str = payload.get('username')
+        payload = jwt.decode(
+            token, os.getenv("SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")]
+        )
+        username: str = payload.get("username")
         print(username)
         if username is None:
             raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"})
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
     except InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"})
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     user = db.scalar(select(User).where(User.username == username))
     if not user:
         raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"})
-    return {"id": user.id, "username": user.username, "role": user.role, "is_active": user.is_active}
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return {
+        "id": user.id,
+        "username": user.username,
+        "role": user.role,
+        "is_active": user.is_active,
+    }
 
 
-async def get_current_active_user(current_user: Annotated[User, Depends(get_current_user)]):
+async def get_current_active_user(
+    current_user: Annotated[User, Depends(get_current_user)]
+):
     if not current_user["is_active"]:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
 
 current_user_dependency = Annotated[dict, Depends(get_current_active_user)]
