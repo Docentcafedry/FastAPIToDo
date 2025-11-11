@@ -30,16 +30,16 @@ async def change_todo_page(request: Request, db: db_connection, todo_id: int = P
         if not user:
             redirect_to_login()
         todo = db.scalar(select(Todo).where(Todo.id == todo_id).where(Todo.owner_id == user.id))
-        return templates.TemplateResponse(request=request, name='change_todo.html', context={"title": "Update Todo", "todo": todo})
+        return templates.TemplateResponse(request=request, name='change_todo.html', context={"title": "Update Todo", "todo": todo, "logout": True})
     except:
         redirect_to_login()
     return templates.TemplateResponse(request=request, name='change_todo.html',
-                                      context={"title": "Update Todo", "todo": todo})
+                                      context={"title": "Update Todo", "todo": todo, "logout": True})
 
 
 @router.get("/todos/create", response_class=HTMLResponse)
 async def todos_page(request: Request):
-    return templates.TemplateResponse(request=request, name='add_todo.html', context={"title": "Create Todo"})
+    return templates.TemplateResponse(request=request, name='add_todo.html', context={"title": "Create Todo", "logout": True})
 
 @router.get("/todos", response_class=HTMLResponse)
 async def todos_page(request: Request, db: db_connection):
