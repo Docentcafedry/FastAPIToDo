@@ -28,11 +28,17 @@ class Token(BaseModel):
 
 
 class TodoCreate(BaseModel):
-    name: str = Field(min_length=4, max_length=15)
-    description: str = Field(min_length=5, max_length=50)
-    priority: int = Field(gt=0, lt=6)
-    is_done: bool = Field(default=False)
+    name: str = Field(min_length=4, max_length=15, description="Todo name")
+    description: str = Field(
+        min_length=5, max_length=50, description="Todo description"
+    )
+    priority: int = Field(gt=0, lt=6, description="Todo priority")
+    is_done: bool = Field(default=False, description="is done")
 
 
 class TodoUpdate(TodoCreate):
     pass
+
+
+class Todo(TodoCreate):
+    id: str = Field(..., description="Todo ID")

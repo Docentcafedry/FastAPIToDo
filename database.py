@@ -1,21 +1,26 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-import os
-from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
-load_dotenv()
+from config.settings import settings
 
-
-engine = create_engine(
-    f'postgresql+psycopg2://{os.getenv("POSTGRES_USER")}:{os.getenv("POSTGRES_PASSWORD")}@localhost:5432/todosapp'
+async_session = sessionmaker(  # type: ignore[call-overload]
+    create_async_engine(
+        settings.DATABASE_URL,
+        pool_pre_ping=True,
+        pool_size=50,
+        max_overflow=100,
+        pool_timeout=30,
+        pool_recycle=1800,
+        pool_use_lifo=True,
+    ),
+    expire_on_commit=False,
+    class_=AsyncSession,
 )
 
-session = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-
-def get_db_connection():
-    db = session()
+async def get_db_connection():
+    db = async_session()
     try:
         yield db
     finally:
-        db.close()
+        await db.close()
