@@ -20,6 +20,47 @@ class SQLTodoDAO(TodoDAOInterface):
             return None
         return Todo.model_validate(todo)
 
+    async def get_by_id_and_user(self, todo_id: int, user_id: int) -> Optional[Todo]:
+        result = await self.session.execute(
+            select(TodoModel)
+            .where(TodoModel.id == todo_id)
+            .where(TodoModel.owner_id == user_id)
+        )
+        todo = result.scalar_one_or_none()
+        if not todo:
+            return None
+        print(todo)
+        return Todo.model_validate(
+            {
+                "id": str(todo.id),
+                "name": todo.name,
+                "description": todo.description,
+                "is_done": todo.is_done,
+                "priority": todo.priority,
+                "owner_id": todo.owner_id,
+            }
+        )
+
+    async def get_all_todos_for_user(self, user_id: int) -> List[Todo]:
+
+        result = await self.session.execute(
+            select(TodoModel).where(TodoModel.owner_id == user_id)
+        )
+        todos = result.scalars().all()
+        return [
+            Todo.model_validate(
+                {
+                    "id": str(todo.id),
+                    "name": todo.name,
+                    "description": todo.description,
+                    "is_done": todo.is_done,
+                    "priority": todo.priority,
+                    "owner_id": todo.owner_id,
+                }
+            )
+            for todo in todos
+        ]
+
     async def get_all(self) -> List[Todo]:
         result = await self.session.execute(select(TodoModel))
         todos = result.scalars().all()

@@ -24,9 +24,23 @@ class TodoService(TodoServiceInterface):
                 raise NotFoundError(resource_type="todo", resource_id=str(todo_id))
             return todo
 
+    async def get_by_id_and_user(self, todo_id: int, user_id: int) -> Optional[Todo]:
+        async with self.uow:
+            todo = await self.todo_dao.get_by_id_and_user(
+                todo_id=todo_id, user_id=user_id
+            )
+            if not todo:
+                raise NotFoundError(resource_type="todo", resource_id=str(todo_id))
+            return todo
+
     async def get_all_todos(self) -> List[Todo]:
         async with self.uow:
             todos = await self.todo_dao.get_all()
+            return todos
+
+    async def get_all_todos_for_user(self, user_id: int) -> List[Todo]:
+        async with self.uow:
+            todos = await self.todo_dao.get_all_todos_for_user(user_id=user_id)
             return todos
 
     async def update_todo(self, todo_id: int, data: TodoUpdate) -> Todo:

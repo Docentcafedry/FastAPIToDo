@@ -27,7 +27,7 @@ async def get_current_user_from_token(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    user = db.scalar(select(User).where(User.username == username))
+    user = await db.scalar(select(User).where(User.username == username))
     return user
 
 

@@ -27,31 +27,32 @@ def redirect_to_login():
 @router.get("/change/{todo_id}", response_class=HTMLResponse)
 async def change_todo_page(
     request: Request,
-    service: db_connection,
+    service: todo_service,
     db: db_connection,
     todo_id: int = Path(gt=0),
 ):
-    try:
-        access_token = request.cookies.get("access_token")
-        user = await get_current_user_from_token(access_token, db)
+    access_token = request.cookies.get("access_token")
+    user = await get_current_user_from_token(access_token, db)
+    print(user.id)
 
-        if not user:
-            redirect_to_login()
-        todo = db.scalar(
-            select(Todo).where(Todo.id == todo_id).where(Todo.owner_id == user.id)
-        )
-        return templates.TemplateResponse(
-            request=request,
-            name="change_todo.html",
-            context={"title": "Update Todo", "todo": todo, "logout": True},
-        )
-    except:
+    if not user:
         redirect_to_login()
+    todo = await service.get_by_id_and_user(todo_id=todo_id, user_id=int(user.id))
+
     return templates.TemplateResponse(
         request=request,
         name="change_todo.html",
         context={"title": "Update Todo", "todo": todo, "logout": True},
     )
+
+
+# except:
+#     redirect_to_login()
+# return templates.TemplateResponse(
+#     request=request,
+#     name="change_todo.html",
+#     context={"title": "Update Todo", "todo": todo, "logout": True},
+# )
 
 
 @router.get("/todos/create", response_class=HTMLResponse)
@@ -71,7 +72,7 @@ async def todos_page(request: Request, service: todo_service, db: db_connection)
 
         if not user:
             redirect_to_login()
-        todos = await service.get_all_todos()
+        todos = await service.get_all_todos_for_user(user_id=int(user.id))
         return templates.TemplateResponse(
             request=request,
             name="todo.html",

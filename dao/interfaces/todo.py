@@ -18,6 +18,15 @@ class TodoDAOInterface(ABC):  # pragma: no cover
         pass
 
     @abstractmethod
+    async def get_all_todos_for_user(self, user_id: int) -> List[Todo]:
+
+        pass
+
+    @abstractmethod
+    async def get_by_id_and_user(self, todo_id: int, user_id: int) -> Optional[Todo]:
+        pass
+
+    @abstractmethod
     async def create(self, user_id: int, data: TodoCreate) -> Todo:
         pass
 

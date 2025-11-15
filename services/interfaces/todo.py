@@ -14,6 +14,15 @@ class TodoServiceInterface(ABC):
         pass
 
     @abstractmethod
+    async def get_all_todos_for_user(self, user_id: int) -> List[Todo]:
+
+        pass
+
+    @abstractmethod
+    async def get_by_id_and_user(self, todo_id: int, user_id: int) -> Optional[Todo]:
+        pass
+
+    @abstractmethod
     async def update_todo(self, todo_id: int, data: TodoUpdate) -> Todo:
         pass
 
