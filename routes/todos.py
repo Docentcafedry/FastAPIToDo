@@ -5,9 +5,10 @@ from depends.db import db_connection
 from starlette import status
 from models import Todo
 from sqlalchemy import select
-from schemas import TodoCreate, TodoUpdate
+from schemas import TodoCreate, TodoUpdate, Todo
 from depends.auth import current_user_dependency
 from fastapi.templating import Jinja2Templates
+from services.dependency import todo_service
 
 
 router = APIRouter(prefix="/todos", tags=["todos"])
@@ -25,7 +26,10 @@ def redirect_to_login():
 
 @router.get("/change/{todo_id}", response_class=HTMLResponse)
 async def change_todo_page(
-    request: Request, db: db_connection, todo_id: int = Path(gt=0)
+    request: Request,
+    service: db_connection,
+    db: db_connection,
+    todo_id: int = Path(gt=0),
 ):
     try:
         access_token = request.cookies.get("access_token")
@@ -60,15 +64,14 @@ async def todos_page(request: Request):
 
 
 @router.get("/todos", response_class=HTMLResponse)
-async def todos_page(request: Request, db: db_connection):
+async def todos_page(request: Request, service: todo_service, db: db_connection):
     try:
         access_token = request.cookies.get("access_token")
         user = await get_current_user_from_token(access_token, db)
 
         if not user:
             redirect_to_login()
-        todos = db.query(Todo).filter(Todo.owner_id == user.id).all()
-        print(todos)
+        todos = await service.get_all_todos()
         return templates.TemplateResponse(
             request=request,
             name="todo.html",
@@ -88,13 +91,15 @@ async def get_todos(db: db_connection, current_user: current_user_dependency):
     return todos
 
 
-@router.post("/create", status_code=status.HTTP_201_CREATED)
+@router.post("/create")
 async def create_todo(
-    todo: TodoCreate, db: db_connection, current_user: current_user_dependency
+    todo: TodoCreate,
+    service: todo_service,
+    db: db_connection,
+    current_user: current_user_dependency,
 ):
-    new_todo: Todo = Todo(**todo.model_dump(), owner_id=current_user["id"])
-    db.add(new_todo)
-    db.commit()
+    new_todo = await service.create_todo(user_id=current_user["id"], data=todo)
+    return new_todo
 
 
 @router.get("/{todo_id}", status_code=status.HTTP_200_OK)

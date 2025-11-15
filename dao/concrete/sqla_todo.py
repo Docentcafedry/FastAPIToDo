@@ -2,7 +2,6 @@ from typing import List, Optional
 
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from dao.interfaces import TodoDAOInterface
 from models import Todo as TodoModel
 from schemas import TodoCreate, TodoUpdate, Todo
@@ -24,30 +23,52 @@ class SQLTodoDAO(TodoDAOInterface):
     async def get_all(self) -> List[Todo]:
         result = await self.session.execute(select(TodoModel))
         todos = result.scalars().all()
-        return [Todo.model_validate(todo) for todo in todos]
+        return [
+            Todo.model_validate(
+                {
+                    "id": str(todo.id),
+                    "name": todo.name,
+                    "description": todo.description,
+                    "is_done": todo.is_done,
+                    "priority": todo.priority,
+                    "owner_id": todo.owner_id,
+                }
+            )
+            for todo in todos
+        ]
 
     async def create(
         self,
         user_id: int,
         data: TodoCreate,
     ) -> Todo:
-        todo = TodoModel(**data.model_dump(), owner_id=user_id)
+        todo = TodoModel(
+            name=data.name,
+            description=data.description,
+            is_done=data.is_done,
+            priority=data.priority,
+            owner_id=user_id,
+        )
         self.session.add(todo)
         await self.session.flush()
 
-        return Todo(
-            id=todo.id,
+        schema = Todo(
+            id=str(todo.id),
             name=todo.name,
             description=todo.description,
             priority=todo.priority,
             is_done=todo.is_done,
+            owner_id=user_id,
         )
+        print(schema)
+
+        return schema
 
     async def update(self, todo_id: int, data: TodoUpdate) -> Optional:
         result = await self.session.execute(
             select(TodoModel).where(TodoModel.id == todo_id)
         )
-        todo_db = result.scalar_one_or_none()
+        todo_db = await result.scalar_one_or_none()
         if not todo_db:
             raise ValueError(f"Todo {todo_id} not found")
         todo_db.name = data.name

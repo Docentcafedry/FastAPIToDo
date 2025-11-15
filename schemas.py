@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr
-from typing import Optional
+from typing import Optional, List
 
 
 class ChangeUserNumber(BaseModel):
@@ -41,4 +41,16 @@ class TodoUpdate(TodoCreate):
 
 
 class Todo(TodoCreate):
-    id: str = Field(..., description="Todo ID")
+    id: str = Field(description="Todo ID")
+    owner_id: int = Field(description="Owner ID")
+
+
+class ErrorResponse(BaseModel):
+    code: str
+    details: str
+    message: Optional[str] = None
+    key: Optional[str] = None
+
+
+class ErrorEnvelope(BaseModel):
+    errors: List[ErrorResponse]

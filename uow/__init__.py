@@ -1,2 +1,2 @@
 from .sqla import SQLAUnitOfWork
-from base import BaseUnitOfWork
+from .base import BaseUnitOfWork

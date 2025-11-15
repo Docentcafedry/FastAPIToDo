@@ -60,7 +60,7 @@ async def sign_up(db: db_connection, user_data: UserCreate):
 async def auth_user(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_connection
 ):
-    user = db.scalar(select(User).where(User.username == form_data.username))
+    user = await db.scalar(select(User).where(User.username == form_data.username))
     if not user:
         raise HTTPException(status_code=401, detail="Bad credentials")
     passwords_match = pwd_context.verify(form_data.password, user.hashed_password)
