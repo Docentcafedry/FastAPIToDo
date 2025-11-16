@@ -48,7 +48,6 @@
     if (editTodoForm) {
         editTodoForm.addEventListener('submit', async function (event) {
         event.preventDefault();
-        event.stopPropagation()
         const form = event.target;
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
@@ -117,7 +116,7 @@
 
                 if (response.ok) {
                     // Handle success
-                    window.location.href = '/todos/todo-page'; // Redirect to the todo page
+                    window.location.href = '/todos/todos'; // Redirect to the todo page
                 } else {
                     // Handle error
                     const errorData = await response.json();

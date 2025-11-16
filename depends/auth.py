@@ -9,12 +9,13 @@ from jwt import InvalidTokenError
 from starlette import status
 from sqlalchemy import select
 from models import User
+from utils import redirect_to_login
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 async def get_current_user_from_token(
-    token, db: Annotated[Session, Depends(get_db_connection)]
+    token, db: Annotated[Session, Depends(get_db_connection)], page: bool = False
 ):
     try:
         payload = jwt.decode(

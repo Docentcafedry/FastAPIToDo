@@ -18,7 +18,16 @@ class SQLTodoDAO(TodoDAOInterface):
         todo = result.scalar_one_or_none()
         if not todo:
             return None
-        return Todo.model_validate(todo)
+        return Todo.model_validate(
+            {
+                "id": str(todo.id),
+                "name": todo.name,
+                "description": todo.description,
+                "is_done": todo.is_done,
+                "priority": todo.priority,
+                "owner_id": todo.owner_id,
+            }
+        )
 
     async def get_by_id_and_user(self, todo_id: int, user_id: int) -> Optional[Todo]:
         result = await self.session.execute(
@@ -106,10 +115,12 @@ class SQLTodoDAO(TodoDAOInterface):
         return schema
 
     async def update(self, todo_id: int, data: TodoUpdate) -> Optional:
+        print("inf func")
         result = await self.session.execute(
             select(TodoModel).where(TodoModel.id == todo_id)
         )
-        todo_db = await result.scalar_one_or_none()
+        todo_db = result.scalar_one_or_none()
+        print(todo_db)
         if not todo_db:
             raise ValueError(f"Todo {todo_id} not found")
         todo_db.name = data.name
@@ -118,6 +129,7 @@ class SQLTodoDAO(TodoDAOInterface):
         todo_db.is_done = data.is_done
 
         await self.session.flush()
+        print(todo_db)
 
         return await self.get_by_id(todo_id)
 

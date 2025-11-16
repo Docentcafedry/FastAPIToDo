@@ -9,19 +9,12 @@ from schemas import TodoCreate, TodoUpdate, Todo
 from depends.auth import current_user_dependency
 from fastapi.templating import Jinja2Templates
 from services.dependency import todo_service
+from utils import redirect_to_login
 
 
 router = APIRouter(prefix="/todos", tags=["todos"])
 
 templates = Jinja2Templates(directory="templates")
-
-
-def redirect_to_login():
-    redirect_response = RedirectResponse(
-        url="/auth/login", status_code=status.HTTP_302_FOUND
-    )
-    redirect_response.delete_cookie(key="access_token")
-    return redirect_response
 
 
 @router.get("/change/{todo_id}", response_class=HTMLResponse)
@@ -33,7 +26,6 @@ async def change_todo_page(
 ):
     access_token = request.cookies.get("access_token")
     user = await get_current_user_from_token(access_token, db)
-    print(user.id)
 
     if not user:
         redirect_to_login()
@@ -44,15 +36,6 @@ async def change_todo_page(
         name="change_todo.html",
         context={"title": "Update Todo", "todo": todo, "logout": True},
     )
-
-
-# except:
-#     redirect_to_login()
-# return templates.TemplateResponse(
-#     request=request,
-#     name="change_todo.html",
-#     context={"title": "Update Todo", "todo": todo, "logout": True},
-# )
 
 
 @router.get("/todos/create", response_class=HTMLResponse)
@@ -66,22 +49,16 @@ async def todos_page(request: Request):
 
 @router.get("/todos", response_class=HTMLResponse)
 async def todos_page(request: Request, service: todo_service, db: db_connection):
-    try:
-        access_token = request.cookies.get("access_token")
-        user = await get_current_user_from_token(access_token, db)
-
-        if not user:
-            redirect_to_login()
-        todos = await service.get_all_todos_for_user(user_id=int(user.id))
-        return templates.TemplateResponse(
-            request=request,
-            name="todo.html",
-            context={"title": "Todos", "todos": todos, "logout": True},
-        )
-    except:
-        redirect_to_login()
-    # return templates.TemplateResponse(request=request, name='todo.html', context={"title": "Todos", "todos": todos})
-    return "hello"
+    access_token = request.cookies.get("access_token")
+    if not access_token:
+        return redirect_to_login()
+    user = await get_current_user_from_token(access_token, db)
+    todos = await service.get_all_todos_for_user(user_id=int(user.id))
+    return templates.TemplateResponse(
+        request=request,
+        name="todo.html",
+        context={"title": "Todos", "todos": todos, "logout": True},
+    )
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
@@ -105,15 +82,12 @@ async def create_todo(
 
 @router.get("/{todo_id}", status_code=status.HTTP_200_OK)
 async def get_todo_by_id(
-    db: db_connection, current_user: current_user_dependency, todo_id: int = Path(gt=0)
+    db: db_connection,
+    service: todo_service,
+    current_user: current_user_dependency,
+    todo_id: int = Path(gt=0),
 ):
-    todo = db.scalar(
-        select(Todo)
-        .where(Todo.id == todo_id)
-        .where(Todo.owner_id == current_user["id"])
-    )
-    if not todo:
-        raise HTTPException(status_code=404, detail="There is no such Todo")
+    todo = await service.get_by_id_todo(todo_id=todo_id)
     return todo
 
 
@@ -121,31 +95,19 @@ async def get_todo_by_id(
 async def update_todo_by_idt(
     todo: TodoUpdate,
     db: db_connection,
+    service: todo_service,
     current_user: current_user_dependency,
     todo_id: int = Path(gt=0),
 ):
-    todo_db: Todo = db.scalar(select(Todo).where(Todo.id == todo_id))
-    if not todo_db:
-        raise HTTPException(status_code=404, detail="There is no such Todo")
-    if todo_db.owner_id != current_user["id"]:
-        raise HTTPException(403, detail="You have no rights to update this record")
-    todo_db.name = todo.name
-    todo_db.description = todo.description
-    todo_db.priority = todo.priority
-    todo_db.is_done = todo.is_done
 
-    db.add(todo_db)
-    db.commit()
+    updated_todo = await service.update_todo(todo_id=todo_id, data=todo)
+    return updated_todo
 
 
 @router.delete("/delete/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_todo_by_id(
-    db: db_connection, current_user: current_user_dependency, todo_id: int = Path(gt=0)
+    service: todo_service,
+    current_user: current_user_dependency,
+    todo_id: int = Path(gt=0),
 ):
-    todo_db: Todo = db.scalar(select(Todo).where(Todo.id == todo_id))
-    if not todo_db:
-        raise HTTPException(status_code=404, detail="There is no such Todo")
-    if todo_db.owner_id != current_user["id"]:
-        raise HTTPException(403, detail="You have no rights to update this record")
-    db.delete(todo_db)
-    db.commit()
+    await service.delete_todo(todo_id=todo_id)
