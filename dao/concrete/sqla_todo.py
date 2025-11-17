@@ -137,3 +137,11 @@ class SQLTodoDAO(TodoDAOInterface):
         await self.session.execute(delete(TodoModel).where(TodoModel.id == todo_id))
 
         await self.session.flush()
+
+    async def delete_by_owner(self, todo_id: int, user_id: int) -> None:
+        await self.session.execute(
+            delete(TodoModel)
+            .where(TodoModel.id == todo_id)
+            .where(TodoModel.owner_id == user_id)
+        )
+        await self.session.flush()

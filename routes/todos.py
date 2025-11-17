@@ -106,4 +106,4 @@ async def delete_todo_by_id(
     current_user: current_user_dependency,
     todo_id: int = Path(gt=0),
 ):
-    await service.delete_todo(todo_id=todo_id)
+    await service.delete_todo_by_owner(todo_id=todo_id, user_id=current_user["id"])

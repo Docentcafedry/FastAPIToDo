@@ -94,10 +94,11 @@
             alert('An error occurred. Please try again.');
         }
     });
-
-        document.getElementById('deleteButton').addEventListener('click', async function (event) {
+    }
+    document.getElementById('deleteButton').addEventListener('click', async function(event)  {
             var url = window.location.pathname;
             const todoId = url.substring(url.lastIndexOf('/') + 1);
+            event.preventDefault()
 
             event.stopPropagation()
 
@@ -127,9 +128,6 @@
                 alert('An error occurred. Please try again.');
             }
         });
-
-        
-    }
 
     // Login JS
     const loginForm = document.getElementById('loginForm');

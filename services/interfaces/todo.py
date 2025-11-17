@@ -31,6 +31,10 @@ class TodoServiceInterface(ABC):
         pass
 
     @abstractmethod
+    async def delete_todo_by_owner(self, todo_id: int, user_id: int) -> None:
+        pass
+
+    @abstractmethod
     async def get_by_id_todo(self, todo_id: int) -> Optional[Todo]:
 
         pass

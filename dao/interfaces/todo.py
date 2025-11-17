@@ -37,3 +37,7 @@ class TodoDAOInterface(ABC):  # pragma: no cover
     @abstractmethod
     async def delete(self, todo_id: int) -> None:
         pass
+
+    @abstractmethod
+    async def delete_by_owner(self, todo_id: int, user_id: int) -> None:
+        pass

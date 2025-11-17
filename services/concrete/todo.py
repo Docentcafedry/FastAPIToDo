@@ -50,5 +50,8 @@ class TodoService(TodoServiceInterface):
 
     async def delete_todo(self, todo_id: int) -> None:
         async with self.uow:
-            async with self.uow:
-                await self.todo_dao.delete(todo_id=todo_id)
+            await self.todo_dao.delete(todo_id=todo_id)
+
+    async def delete_todo_by_owner(self, todo_id: int, user_id: int) -> None:
+        async with self.uow:
+            await self.todo_dao.delete_by_owner(todo_id=todo_id, user_id=user_id)
