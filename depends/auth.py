@@ -10,13 +10,29 @@ from starlette import status
 from sqlalchemy import select
 from models import User
 from utils import redirect_to_login
+from fastapi import Request
+from typing import Optional
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
+async def get_current_user_from_token_cookie(
+    request: Request, db: Annotated[Session, Depends(get_db_connection)]
+) -> Optional[dict]:
+    access_token = request.cookies.get("access_token")
+    if not access_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    user = await get_current_user_from_token(access_token, db)
+    return user
+
+
 async def get_current_user_from_token(
     token, db: Annotated[Session, Depends(get_db_connection)], page: bool = False
-):
+) -> dict:
     try:
         payload = jwt.decode(
             token, os.getenv("SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")]
@@ -29,7 +45,12 @@ async def get_current_user_from_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     user = await db.scalar(select(User).where(User.username == username))
-    return user
+    return {
+        "id": user.id,
+        "username": user.username,
+        "role": user.role,
+        "is_active": user.is_active,
+    }
 
 
 async def get_current_user(
@@ -70,7 +91,15 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: Annotated[User, Depends(get_current_user)]
+    current_user: Annotated[dict, Depends(get_current_user)]
+):
+    if not current_user["is_active"]:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+async def get_current_active_user_cookie(
+    current_user: Annotated[dict, Depends(get_current_user_from_token_cookie)]
 ):
     if not current_user["is_active"]:
         raise HTTPException(status_code=400, detail="Inactive user")
@@ -78,3 +107,6 @@ async def get_current_active_user(
 
 
 current_user_dependency = Annotated[dict, Depends(get_current_active_user)]
+current_user_cookie_dependency = Annotated[
+    dict, Depends(get_current_active_user_cookie)
+]

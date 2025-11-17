@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Path, HTTPException, Request
 from starlette.responses import HTMLResponse, RedirectResponse
-from depends.auth import get_current_user_from_token
+from depends.auth import get_current_user_from_token, current_user_cookie_dependency
 from depends.db import db_connection
 from starlette import status
 from models import Todo
@@ -21,15 +21,10 @@ templates = Jinja2Templates(directory="templates")
 async def change_todo_page(
     request: Request,
     service: todo_service,
-    db: db_connection,
+    current_user: current_user_cookie_dependency,
     todo_id: int = Path(gt=0),
 ):
-    access_token = request.cookies.get("access_token")
-    user = await get_current_user_from_token(access_token, db)
-
-    if not user:
-        redirect_to_login()
-    todo = await service.get_by_id_and_user(todo_id=todo_id, user_id=int(user.id))
+    todo = await service.get_by_id_and_user(todo_id=todo_id, user_id=current_user["id"])
 
     return templates.TemplateResponse(
         request=request,
@@ -48,12 +43,15 @@ async def todos_page(request: Request):
 
 
 @router.get("/todos", response_class=HTMLResponse)
-async def todos_page(request: Request, service: todo_service, db: db_connection):
-    access_token = request.cookies.get("access_token")
-    if not access_token:
+async def todos_page(
+    request: Request,
+    service: todo_service,
+    current_user: current_user_cookie_dependency,
+):
+    if not current_user:
         return redirect_to_login()
-    user = await get_current_user_from_token(access_token, db)
-    todos = await service.get_all_todos_for_user(user_id=int(user.id))
+
+    todos = await service.get_all_todos_for_user(user_id=current_user["id"])
     return templates.TemplateResponse(
         request=request,
         name="todo.html",
@@ -82,9 +80,7 @@ async def create_todo(
 
 @router.get("/{todo_id}", status_code=status.HTTP_200_OK)
 async def get_todo_by_id(
-    db: db_connection,
     service: todo_service,
-    current_user: current_user_dependency,
     todo_id: int = Path(gt=0),
 ):
     todo = await service.get_by_id_todo(todo_id=todo_id)

@@ -21,7 +21,7 @@ configure_exception_handlers(app)
 
 @app.get("/", response_class=HTMLResponse)
 async def main_page(request: Request):
-    return RedirectResponse("/todos/todos", status_code=status.HTTP_302_FOUND)
+    return RedirectResponse("/auth/login", status_code=status.HTTP_302_FOUND)
     # return "application"
 
 
