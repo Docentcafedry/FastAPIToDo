@@ -52,7 +52,7 @@ async def sign_up(db: db_connection, user_data: UserCreate):
         role=user_data.role,
     )
     db.add(user)
-    db.commit()
+    await db.commit()
     return user
 
 

@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Path, HTTPException, Request
-from starlette.responses import HTMLResponse, RedirectResponse
-from depends.auth import get_current_user_from_token, current_user_cookie_dependency
+from fastapi import APIRouter, Path, Request
+from starlette.responses import HTMLResponse
+from depends.auth import current_user_cookie_dependency
 from depends.db import db_connection
 from starlette import status
-from models import Todo
-from sqlalchemy import select
 from schemas import TodoCreate, TodoUpdate, Todo
 from depends.auth import current_user_dependency
 from fastapi.templating import Jinja2Templates
@@ -60,10 +58,8 @@ async def todos_page(
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
-async def get_todos(db: db_connection, current_user: current_user_dependency):
-    todos = db.scalars(
-        select(Todo).filter(Todo.owner_id == current_user["id"]).order_by(Todo.id)
-    ).all()
+async def get_todos(service: todo_service, current_user: current_user_dependency):
+    todos = await service.get_all_todos_for_user(user_id=current_user["id"])
     return todos
 
 

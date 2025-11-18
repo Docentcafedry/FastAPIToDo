@@ -16,17 +16,22 @@ from sqlalchemy import text
 from models import Todo, User
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
+import asyncio
+import pytest_asyncio
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+import aiosqlite
 
 client = TestClient(app)
 
-engine_test = create_engine("sqlite:///./test.db")
+engine_test = create_async_engine("sqlite+aiosqlite:///./test.db")
 
-session_test = sessionmaker(bind=engine_test, autoflush=False, autocommit=False)
+session_test = sessionmaker(
+    engine_test,
+    expire_on_commit=False,
+    class_=AsyncSession,
+)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-Base.metadata.create_all(bind=engine_test)
 
 
 def get_random_string(length):
@@ -35,12 +40,12 @@ def get_random_string(length):
     # print random string
 
 
-def get_db_connection_test():
+async def get_db_connection_test():
     db = session_test()
     try:
         yield db
     finally:
-        db.close()
+        await db.close()
 
 
 def current_user_dep_replacement():
@@ -51,23 +56,37 @@ def current_user_dep_replacement():
 app.dependency_overrides[get_db_connection] = get_db_connection_test
 
 
-@pytest.fixture(scope="function")
-def session():
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def fake_db():
+    from models import Base
+
+    db = session_test()
+    async with engine_test.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    try:
+        yield db
+    finally:
+        await db.close()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def session():
     session = session_test()
     yield session
     # Remove any data from database (even data not created by this session)
-    session.rollback()  # rollback the transactions
+    await session.rollback()  # rollback the transactions
 
     # truncate all tables
     for table in reversed(Base.metadata.sorted_tables):
-        session.execute(text(f"DELETE FROM {table.name};"))
-        session.commit()
+        await session.execute(text(f"DELETE FROM {table.name};"))
+        await session.commit()
 
-    session.close()
+    await session.close()
 
 
-@pytest.fixture(scope="function")
-def create_user():
+@pytest_asyncio.fixture(scope="function")
+async def create_user():
     hashed_password = pwd_context.hash("123456")
     user: User = User(
         email="user1@example.com",
@@ -82,8 +101,8 @@ def create_user():
     db.commit()
 
 
-@pytest.fixture(scope="function")
-def create_todo():
+@pytest_asyncio.fixture(scope="function")
+async def create_todo():
     todo: Todo = Todo(name="String", description="test todo", priority=2, owner_id=1)
     db = session_test()
     db.add(todo)
