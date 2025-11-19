@@ -63,7 +63,7 @@ async def get_todos(service: todo_service, current_user: current_user_dependency
     return todos
 
 
-@router.post("/create")
+@router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_todo(
     todo: TodoCreate,
     service: todo_service,

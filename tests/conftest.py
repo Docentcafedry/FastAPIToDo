@@ -98,7 +98,7 @@ async def create_user():
     )
     db = session_test()
     db.add(user)
-    db.commit()
+    await db.commit()
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -106,4 +106,4 @@ async def create_todo():
     todo: Todo = Todo(name="String", description="test todo", priority=2, owner_id=1)
     db = session_test()
     db.add(todo)
-    db.commit()
+    await db.commit()
