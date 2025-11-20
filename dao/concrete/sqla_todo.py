@@ -37,7 +37,7 @@ class SQLTodoDAO(TodoDAOInterface):
         )
         todo = result.scalar_one_or_none()
         if not todo:
-            return None
+            raise ValueError(f"Todo {todo_id} not found")
         print(todo)
         return Todo.model_validate(
             {

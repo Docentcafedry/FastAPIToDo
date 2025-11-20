@@ -17,6 +17,27 @@ class UserCreate(BaseModel):
     number: Optional[str] = None
 
 
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    role: Optional[str] = None
+    is_active: Optional[str] = None
+    number: Optional[str] = None
+
+
+class User(BaseModel):
+    id: str = Field(description="Todo ID")
+    email: EmailStr
+    username: str
+    first_name: str
+    last_name: str
+    role: str
+    is_active: bool = Field(default=True)
+    number: Optional[str] = None
+
+
 class UserPasswordChange(BaseModel):
     new_password: str
     confirm_new_password: str

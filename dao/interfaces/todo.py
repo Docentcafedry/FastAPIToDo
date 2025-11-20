@@ -5,7 +5,6 @@ from schemas import Todo, TodoCreate, TodoUpdate
 
 
 class TodoDAOInterface(ABC):  # pragma: no cover
-    """Interface for beer data access."""
 
     @abstractmethod
     async def get_by_id(self, todo_id: str) -> Optional[Todo]:
