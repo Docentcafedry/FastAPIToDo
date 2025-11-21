@@ -15,6 +15,7 @@ class UserCreate(BaseModel):
     role: str
     is_active: bool = Field(default=True)
     number: Optional[str] = None
+    hashed_password: Optional[str] = None
 
 
 class UserUpdate(BaseModel):

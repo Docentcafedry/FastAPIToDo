@@ -57,9 +57,11 @@ class SQLUserDAO(UserDAOInterface):
         self,
         data: UserCreate,
     ) -> User:
-        user: User = User(**data.model_dump())
+        print("enter")
+        user: UserModel = UserModel(**data.model_dump())
         self.session.add(user)
         await self.session.flush()
+        print(user)
 
         schema = User.model_validate(
             {
@@ -105,3 +107,7 @@ class SQLUserDAO(UserDAOInterface):
         self.session.add(user)
         await self.session.commit()
         return user
+
+    async def delete_user(self, user_id: int) -> None:
+        await self.session.execute(delete(UserModel).where(UserModel.id == user_id))
+        await self.session.flush()

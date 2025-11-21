@@ -15,6 +15,7 @@ from starlette import status
 from schemas import UserCreate, UserPasswordChange
 from depends.auth import current_user_dependency
 from fastapi.templating import Jinja2Templates
+from services.dependency import user_service
 
 
 load_dotenv()
@@ -41,18 +42,8 @@ async def main_page(request: Request):
 
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
-async def sign_up(db: db_connection, user_data: UserCreate):
-    hashed_password = pwd_context.hash(user_data.password)
-    user: User = User(
-        email=user_data.email,
-        username=user_data.username,
-        first_name=user_data.first_name,
-        last_name=user_data.last_name,
-        hashed_password=hashed_password,
-        role=user_data.role,
-    )
-    db.add(user)
-    await db.commit()
+async def sign_up(user_data: UserCreate, service: user_service):
+    user = await service.create(data=user_data)
     return user
 
 
@@ -83,16 +74,8 @@ async def get_current_user(current_user: current_user_dependency):
 
 @router.patch("/users/change_password", status_code=status.HTTP_204_NO_CONTENT)
 async def change_current_password(
-    db: db_connection,
     current_user: current_user_dependency,
     form_data: UserPasswordChange,
+    service: user_service,
 ):
-    if not form_data.new_password == form_data.confirm_new_password:
-        raise HTTPException(status_code=400, detail="Passwords should match")
-    user = user = db.scalar(
-        select(User).where(User.username == current_user["username"])
-    )
-    hashed_password = pwd_context.hash(form_data.new_password)
-    user.hashed_password = hashed_password
-    db.add(user)
-    db.commit()
+    await service.change_password(user_id=current_user["id"], data=form_data)
