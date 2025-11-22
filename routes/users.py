@@ -16,4 +16,4 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def get_todos(
     current_user: current_user_dependency, data: ChangeUserNumber, service: user_service
 ):
-    await service.change_password(user_id=current_user["id"], data=data)
+    await service.update(user_id=current_user["id"], data=data)

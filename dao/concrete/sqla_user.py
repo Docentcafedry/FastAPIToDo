@@ -4,7 +4,14 @@ from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from dao.interfaces import UserDAOInterface
 from models import User as UserModel
-from schemas import User, UserPasswordChange, UserCreate, UserUpdate, UserDB
+from schemas import (
+    User,
+    UserPasswordChange,
+    UserCreate,
+    UserUpdate,
+    UserDB,
+    ChangeUserNumber,
+)
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -21,12 +28,13 @@ class SQLUserDAO(UserDAOInterface):
         user = result.scalar_one_or_none()
         if not user:
             raise ValueError(f"User {user_id} not found")
-        return User.model_validate(
+        return UserDB.model_validate(
             {
                 "id": str(user.id),
                 "email": user.email,
                 "username": user.username,
                 "first_name": user.first_name,
+                "password": user.hashed_password,
                 "last_name": user.last_name,
                 "role": user.role,
                 "is_active": user.is_active,
@@ -99,7 +107,9 @@ class SQLUserDAO(UserDAOInterface):
 
         return schema
 
-    async def update_user(self, user_id: int, data: UserUpdate) -> Optional[User]:
+    async def update_user(
+        self, user_id: int, data: UserUpdate | ChangeUserNumber
+    ) -> Optional[User]:
         result = await self.session.execute(
             select(UserModel).where(UserModel.id == user_id)
         )
@@ -107,7 +117,7 @@ class SQLUserDAO(UserDAOInterface):
         if not user_db:
             raise ValueError(f"Todo {user_id} not found")
 
-        for k, v in data.model_dump():
+        for k, v in data.model_dump().items():
             setattr(user_db, k, v)
 
         await self.session.flush()
@@ -122,12 +132,29 @@ class SQLUserDAO(UserDAOInterface):
     async def change_user_password(
         self, user_id: int, data: UserPasswordChange
     ) -> User:
-        user = await self.get_user_by_id(user_id=user_id)
+        result = await self.session.execute(
+            select(UserModel).where(UserModel.id == user_id)
+        )
+        user = result.scalar_one_or_none()
+        if not user:
+            raise ValueError(f"User {user_id} not found")
         hashed_password = pwd_context.hash(data.new_password)
         user.hashed_password = hashed_password
         self.session.add(user)
         await self.session.commit()
-        return user
+        schema = User.model_validate(
+            {
+                "id": str(user.id),
+                "email": user.email,
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "role": user.role,
+                "is_active": user.is_active,
+                "number": user.number,
+            }
+        )
+        return schema
 
     async def delete_user(self, user_id: int) -> None:
         await self.session.execute(delete(UserModel).where(UserModel.id == user_id))
