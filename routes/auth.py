@@ -3,14 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from typing import Annotated
 from starlette.responses import HTMLResponse
-from models import User
-from depends.db import db_connection
+
 from passlib.context import CryptContext
-from sqlalchemy import select
 from dotenv import load_dotenv
 from schemas import Token
-from datetime import timedelta
-from features.jwt_features import create_access_token
 from starlette import status
 from schemas import UserCreate, UserPasswordChange
 from depends.auth import current_user_dependency
@@ -49,21 +45,9 @@ async def sign_up(user_data: UserCreate, service: user_service):
 
 @router.post("/token", response_model=Token, status_code=status.HTTP_201_CREATED)
 async def auth_user(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_connection
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], service: user_service
 ):
-    user = await db.scalar(select(User).where(User.username == form_data.username))
-    if not user:
-        raise HTTPException(status_code=401, detail="Bad credentials")
-    passwords_match = pwd_context.verify(form_data.password, user.hashed_password)
-    if not passwords_match:
-        raise HTTPException(status_code=401, detail="Bad credentials")
-
-    payload = {"username": user.username, "id": user.id, "role": user.role}
-
-    access_token_expires = timedelta(
-        minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
-    )
-    access_token = create_access_token(data=payload, expires_delta=access_token_expires)
+    access_token = await service.validate_user(data=form_data)
     return Token(access_token=access_token, token_type="bearer")
 
 

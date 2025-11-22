@@ -27,6 +27,11 @@ class UserDAOInterface(ABC):  # pragma: no cover
         pass
 
     @abstractmethod
+    async def get_user_by_username(self, username: str) -> Optional[User]:
+
+        pass
+
+    @abstractmethod
     async def delete_user(self, user_id: int) -> None:
         pass
 

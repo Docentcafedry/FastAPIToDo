@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from schemas import User, UserPasswordChange, UserCreate, UserUpdate
 from typing import List, Optional
+from fastapi.security import OAuth2PasswordRequestForm
 
 
 class UserServiceInterface(ABC):
@@ -27,4 +28,8 @@ class UserServiceInterface(ABC):
 
     @abstractmethod
     async def change_password(self, user_id: int, data: UserPasswordChange) -> User:
+        pass
+
+    @abstractmethod
+    async def validate_user(self, data: OAuth2PasswordRequestForm) -> Optional[str]:
         pass

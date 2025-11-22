@@ -39,6 +39,10 @@ class User(BaseModel):
     number: Optional[str] = None
 
 
+class UserDB(User):
+    password: str
+
+
 class UserPasswordChange(BaseModel):
     new_password: str
     confirm_new_password: str

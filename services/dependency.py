@@ -3,7 +3,6 @@ from database import get_db_connection
 from services.concrete import TodoService, UserService
 from uow import SQLAUnitOfWork
 from dao.concrete import SQLTodoDAO, SQLUserDAO
-
 from typing import Annotated
 from fastapi import Depends
 from services.interfaces import TodoServiceInterface, UserServiceInterface

@@ -4,7 +4,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from dao.interfaces import UserDAOInterface
 from models import User as UserModel
-from schemas import User, UserPasswordChange, UserCreate, UserUpdate
+from schemas import User, UserPasswordChange, UserCreate, UserUpdate, UserDB
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -26,6 +26,27 @@ class SQLUserDAO(UserDAOInterface):
                 "id": str(user.id),
                 "email": user.email,
                 "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "role": user.role,
+                "is_active": user.is_active,
+                "number": user.number,
+            }
+        )
+
+    async def get_user_by_username(self, username: str) -> Optional[User]:
+        result = await self.session.execute(
+            select(UserModel).where(UserModel.username == username)
+        )
+        user = result.scalar_one_or_none()
+        if not user:
+            raise ValueError(f"User {username} not found")
+        return UserDB.model_validate(
+            {
+                "id": str(user.id),
+                "email": user.email,
+                "username": user.username,
+                "password": user.hashed_password,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "role": user.role,

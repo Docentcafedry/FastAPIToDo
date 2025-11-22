@@ -1,9 +1,16 @@
+import os
+
+from fastapi.security import OAuth2PasswordRequestForm
+
+from features.jwt_features import create_access_token
 from schemas import User, UserPasswordChange, UserCreate, UserUpdate
 from typing import List, Optional
 from services.interfaces import UserServiceInterface
 from dao.concrete import SQLUserDAO
 from uow import BaseUnitOfWork
 from passlib.context import CryptContext
+from fastapi import HTTPException
+from datetime import timedelta
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -46,3 +53,20 @@ class UserService(UserServiceInterface):
         async with self.uow:
             user = await self.user_dao.change_user_password(user_id=user_id, data=data)
             return user
+
+    async def validate_user(self, data: OAuth2PasswordRequestForm) -> Optional[str]:
+        user = await self.user_dao.get_user_by_username(username=data.username)
+        print(user)
+        passwords_match = pwd_context.verify(data.password, user.password)
+        if not passwords_match:
+            raise HTTPException(status_code=401, detail="Bad credentials")
+
+        payload = {"username": user.username, "id": user.id, "role": user.role}
+
+        access_token_expires = timedelta(
+            minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+        )
+        access_token = create_access_token(
+            data=payload, expires_delta=access_token_expires
+        )
+        return access_token
