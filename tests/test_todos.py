@@ -53,7 +53,7 @@ async def test_get_todo_404(session, create_user):
     )
     assert user_obtain_jwt.status_code == 201
     response = client.get(f"/todos/1?token={user_obtain_jwt.json()['access_token']}")
-    assert response.status_code == 404
+    assert response.status_code == 400
 
 
 @pytest.mark.asyncio

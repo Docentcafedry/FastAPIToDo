@@ -22,7 +22,7 @@ async def change_todo_page(
     current_user: current_user_cookie_dependency,
     todo_id: int = Path(gt=0),
 ):
-    todo = await service.get_by_id_and_user(todo_id=todo_id, user_id=current_user["id"])
+    todo = await service.get_by_id(todo_id=todo_id, user_id=current_user["id"])
 
     return templates.TemplateResponse(
         request=request,
@@ -49,7 +49,7 @@ async def todos_page(
     if not current_user:
         return redirect_to_login()
 
-    todos = await service.get_all_todos_for_user(user_id=current_user["id"])
+    todos = await service.get_all_todos(user_id=current_user["id"])
     return templates.TemplateResponse(
         request=request,
         name="todo.html",
@@ -59,7 +59,7 @@ async def todos_page(
 
 @router.get("/", status_code=status.HTTP_200_OK)
 async def get_todos(service: todo_service, current_user: current_user_dependency):
-    todos = await service.get_all_todos_for_user(user_id=current_user["id"])
+    todos = await service.get_all_todos(user_id=current_user["id"])
     return todos
 
 
@@ -77,22 +77,24 @@ async def create_todo(
 @router.get("/{todo_id}", status_code=status.HTTP_200_OK)
 async def get_todo_by_id(
     service: todo_service,
+    current_user: current_user_dependency,
     todo_id: int = Path(gt=0),
 ):
-    todo = await service.get_by_id_todo(todo_id=todo_id)
+    todo = await service.get_by_id(todo_id=todo_id, user_id=current_user["id"])
     return todo
 
 
 @router.put("/update/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def update_todo_by_idt(
     todo: TodoUpdate,
-    db: db_connection,
     service: todo_service,
     current_user: current_user_dependency,
     todo_id: int = Path(gt=0),
 ):
 
-    updated_todo = await service.update_todo(todo_id=todo_id, data=todo)
+    updated_todo = await service.update_todo(
+        todo_id=todo_id, user_id=current_user["id"], data=todo
+    )
     return updated_todo
 
 
@@ -102,4 +104,4 @@ async def delete_todo_by_id(
     current_user: current_user_dependency,
     todo_id: int = Path(gt=0),
 ):
-    await service.delete_todo_by_owner(todo_id=todo_id, user_id=current_user["id"])
+    await service.delete_todo(todo_id=todo_id, user_id=current_user["id"])

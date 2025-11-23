@@ -1,2 +1,2 @@
-from .todo import TodoDAOInterface
+from .todo import TodoDAOInterface, TodoAdminDAOInterface
 from .user import UserDAOInterface
