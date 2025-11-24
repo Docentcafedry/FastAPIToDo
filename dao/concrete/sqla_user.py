@@ -14,6 +14,7 @@ from schemas import (
     ChangeUserNumber,
 )
 
+
 class SQLUserDAO(UserDAOInterface):
     def __init__(self, session: AsyncSession):
         self.session = session
