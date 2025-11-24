@@ -4,6 +4,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from dao.interfaces import UserDAOInterface
 from models import User as UserModel
+from features.jwt_features import hash_password
 from schemas import (
     User,
     UserPasswordChange,
@@ -12,10 +13,6 @@ from schemas import (
     UserDB,
     ChangeUserNumber,
 )
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 class SQLUserDAO(UserDAOInterface):
     def __init__(self, session: AsyncSession):
@@ -138,7 +135,7 @@ class SQLUserDAO(UserDAOInterface):
         user = result.scalar_one_or_none()
         if not user:
             raise ValueError(f"User {user_id} not found")
-        hashed_password = pwd_context.hash(data.new_password)
+        hashed_password = hash_password(data.new_password)
         user.hashed_password = hashed_password
         self.session.add(user)
         await self.session.commit()

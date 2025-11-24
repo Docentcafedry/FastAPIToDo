@@ -1,7 +1,11 @@
+import pytest
 from .conftest import client
+from sqlalchemy import select
+from models import Todo
 
 
-def test_get_todos(session):
+@pytest.mark.asyncio
+async def test_get_todos(session):
     user_create_response = client.post(
         "/auth/signup",
         json={
@@ -25,7 +29,8 @@ def test_get_todos(session):
     assert response.json() == []
 
 
-def test_get_todos_not_empty(session, create_todo):
+@pytest.mark.asyncio
+async def test_get_todos_not_empty(session, create_todo):
     user_create_response = client.post(
         "/auth/signup",
         json={
@@ -49,7 +54,8 @@ def test_get_todos_not_empty(session, create_todo):
     assert len(response.json()) == 1
 
 
-def test_get_todos_not_admin_user(session, create_user, create_todo):
+@pytest.mark.asyncio
+async def test_get_todos_not_admin_user(session, create_user, create_todo):
     user_create_response_second = client.post(
         "/auth/signup",
         json={
@@ -73,7 +79,8 @@ def test_get_todos_not_admin_user(session, create_user, create_todo):
     assert len(response.json()) == 0
 
 
-def test_get_todo_admin_user(session, create_user, create_todo):
+@pytest.mark.asyncio
+async def test_get_todo_admin_user(session, create_user, create_todo):
     user_obtain_jwt = client.post(
         "/auth/token", data={"username": "string1", "password": "123456"}
     )
@@ -84,7 +91,8 @@ def test_get_todo_admin_user(session, create_user, create_todo):
     assert response.status_code == 200
 
 
-def test_update_todo_admin_user(session, create_user, create_todo):
+@pytest.mark.asyncio
+async def test_update_todo_admin_user(session, create_user, create_todo):
     user_obtain_jwt = client.post(
         "/auth/token", data={"username": "string1", "password": "123456"}
     )
@@ -98,10 +106,18 @@ def test_update_todo_admin_user(session, create_user, create_todo):
             "is_done": False,
         },
     )
-    assert response.status_code == 204
+    res = await session.execute(select(Todo).where(Todo.id == 1))
+    todo = res.scalar_one_or_none()
+
+    assert todo.name == "string"
+    assert todo.description == "string"
+    assert todo.priority == 1
+    assert todo.is_done is False
+    assert response.status_code == 200
 
 
-def test_update_todo_different_user(session, create_user, create_todo):
+@pytest.mark.asyncio
+async def test_update_todo_different_user(session, create_user, create_todo):
     user_create_response_second = client.post(
         "/auth/signup",
         json={
@@ -129,10 +145,16 @@ def test_update_todo_different_user(session, create_user, create_todo):
             "is_done": False,
         },
     )
+    res = await session.execute(select(Todo).where(Todo.id == 1))
+    todo = res.scalar_one_or_none()
+
+    assert todo.name == "String"
+
     assert response.status_code == 403
 
 
-def test_delete_todo_admin_user(session, create_user, create_todo):
+@pytest.mark.asyncio
+async def test_delete_todo_admin_user(session, create_user, create_todo):
     user_obtain_jwt = client.post(
         "/auth/token", data={"username": "string1", "password": "123456"}
     )
@@ -140,10 +162,16 @@ def test_delete_todo_admin_user(session, create_user, create_todo):
     response = client.delete(
         f"/admin/todos/delete/1?token={user_obtain_jwt.json()['access_token']}",
     )
+
+    res = await session.execute(select(Todo).where(Todo.id == 1))
+    todo = res.scalar_one_or_none()
+
+    assert todo is None
     assert response.status_code == 204
 
 
-def test_delete_todo_different_user(session, create_user, create_todo):
+@pytest.mark.asyncio
+async def test_delete_todo_different_user(session, create_user, create_todo):
     user_create_response_second = client.post(
         "/auth/signup",
         json={
@@ -165,4 +193,9 @@ def test_delete_todo_different_user(session, create_user, create_todo):
     response = client.delete(
         f"/admin/todos/delete/1?token={user_obtain_jwt.json()['access_token']}",
     )
+
+    res = await session.execute(select(Todo).where(Todo.id == 1))
+    todo = res.scalar_one_or_none()
+
+    assert todo is not None
     assert response.status_code == 403

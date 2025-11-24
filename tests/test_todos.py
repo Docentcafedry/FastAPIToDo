@@ -3,7 +3,7 @@ import random
 from .conftest import client, get_random_string
 import pytest
 from sqlalchemy import select
-from models import User
+from models import Todo
 
 random_integer = random.randint(0, 100)
 
@@ -28,7 +28,6 @@ async def test_get_todos(session):
         "/auth/token",
         data={"username": f"string{random_integer}", "password": "string"},
     )
-    print(user_obtain_jwt.json()["access_token"])
     assert user_obtain_jwt.status_code == 201
     response = client.get(f"/todos/?token={user_obtain_jwt.json()['access_token']}")
     assert response.status_code == 200
@@ -71,9 +70,9 @@ async def test_create_todo(session, create_user):
             "is_done": False,
         },
     )
-    res = await session.execute(select(User).where(User.username == "string1"))
-    user = res.scalar_one_or_none()
-    assert user.username == "string1"
+    res = await session.execute(select(Todo).where(Todo.name == "string"))
+    todo = res.scalar_one_or_none()
+    assert todo is not None
     assert response.status_code == 201
 
 
@@ -88,6 +87,11 @@ async def test_create_todo_without_token(session):
             "is_done": False,
         },
     )
+
+    res = await session.execute(select(Todo))
+    todos = res.scalars().all()
+
+    assert len(todos) == 0
     assert response.status_code == 422
 
 
@@ -106,6 +110,13 @@ async def test_update_todo(session, create_user, create_todo):
             "is_done": False,
         },
     )
+
+    res = await session.execute(select(Todo).where(Todo.id == 1))
+    todo = res.scalar_one_or_none()
+    assert todo.name == "string"
+    assert todo.description == "string"
+    assert todo.priority == 1
+    assert todo.is_done is False
     assert response.status_code == 204
 
 
@@ -120,6 +131,9 @@ async def test_update_todo_without_token(session, create_user, create_todo):
             "is_done": False,
         },
     )
+    res = await session.execute(select(Todo).where(Todo.id == 1))
+    todo = res.scalar_one_or_none()
+    assert todo.name == "String"
 
     assert response.status_code == 422
 
@@ -133,4 +147,8 @@ async def test_delete_todo(session, create_user, create_todo):
     response = client.delete(
         f"/todos/delete/1?token={user_obtain_jwt.json()['access_token']}",
     )
+
+    res = await session.execute(select(Todo).where(Todo.id == 1))
+    todo = res.scalar_one_or_none()
+    assert todo is None
     assert response.status_code == 204
