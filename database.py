@@ -2,11 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 
-# test ci commentdsadsadsadsadsadsadsa
-
-# ddsadsadsadsadsadsadsadasdsadsadasdsadsadsa
 from config.settings import settings
-
+#dsadsadsa
 async_session = sessionmaker(  # type: ignore[call-overload]
     create_async_engine(
         settings.DATABASE_URL,
