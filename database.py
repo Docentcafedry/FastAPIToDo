@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 
-#test ci comment
+# test ci comment
 
 
 from config.settings import settings
