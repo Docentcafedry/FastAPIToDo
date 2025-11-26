@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 # test ci commentdsadsadsadsadsadsadsa
 
-#ddsadsadsadsa
+# ddsadsadsadsadsadsadsa
 from config.settings import settings
 
 async_session = sessionmaker(  # type: ignore[call-overload]
