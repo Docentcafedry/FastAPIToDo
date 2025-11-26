@@ -102,6 +102,7 @@ class SQLUserDAO(UserDAOInterface):
                 "number": user.number,
             }
         )
+        print(schema)
 
         return schema
 
