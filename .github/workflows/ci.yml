@@ -25,4 +25,5 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: | 
-          docker run --rm todos pytest -s -v
+          docker-compose up -d 
+          docker exec todos-web-1 pytest -s -v
