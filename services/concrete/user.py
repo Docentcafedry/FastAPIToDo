@@ -57,6 +57,7 @@ class UserService(UserServiceInterface):
         print(user, "from service")
         print(data.username, data.password)
         passwords_match = verify_password(data.password, user.password)
+        print(passwords_match)
         if not passwords_match:
             raise HTTPException(status_code=401, detail="Bad credentials")
 
