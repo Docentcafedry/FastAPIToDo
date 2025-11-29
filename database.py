@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 from config.settings import settings
 
+# dsadsadsadsadsadsadsadsa
 async_session = sessionmaker(  # type: ignore[call-overload]
     create_async_engine(
         settings.DATABASE_URL,
