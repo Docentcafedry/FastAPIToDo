@@ -67,4 +67,5 @@ class UserService(UserServiceInterface):
         access_token = create_access_token(
             data=payload, expires_delta=access_token_expires
         )
+        print(access_token)
         return access_token
