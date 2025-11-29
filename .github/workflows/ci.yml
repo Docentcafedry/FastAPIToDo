@@ -28,7 +28,3 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           
       run: pytest -s -v
-<<<<<<< HEAD
-q
-=======
->>>>>>> e361a44075854025d5506dabcac42ad2c3a01317

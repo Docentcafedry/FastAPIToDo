@@ -104,7 +104,6 @@ async def create_user():
     await db.flush()
 
 
-
 @pytest_asyncio.fixture(scope="function")
 async def create_todo():
     todo: Todo = Todo(name="String", description="test todo", priority=2, owner_id=1)
