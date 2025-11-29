@@ -55,6 +55,7 @@ class UserService(UserServiceInterface):
     async def validate_user(self, data: OAuth2PasswordRequestForm) -> Optional[str]:
         user = await self.user_dao.get_user_by_username(username=data.username)
         print(user, "from service")
+        print(data)
         passwords_match = verify_password(data.password, user.password)
         if not passwords_match:
             raise HTTPException(status_code=401, detail="Bad credentials")
