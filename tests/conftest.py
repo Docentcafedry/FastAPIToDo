@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 
 from database import get_db_connection
 from depends.auth import get_current_user, get_current_active_user
@@ -100,6 +101,11 @@ async def create_user():
     print(db)
     db.add(user)
     await db.commit()
+    await db.flush()
+
+    res = await db.execute(select(User).where(User.username == "string1"))
+    user = res.scalar_one_or_none()
+    print(user)
 
 
 @pytest_asyncio.fixture(scope="function")
