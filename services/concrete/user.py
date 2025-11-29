@@ -63,12 +63,10 @@ class UserService(UserServiceInterface):
 
         payload = {"username": user.username, "id": user.id, "role": user.role}
         print(payload)
-
-        token_expires_time = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES") | 30
-        print(token_expires_time)
+        print(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"), os.getenv("DATABASE_URL"))
 
         access_token_expires = timedelta(
-            minutes=int(token_expires_time)
+            minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
         )
         print(access_token_expires)
         access_token = create_access_token(
