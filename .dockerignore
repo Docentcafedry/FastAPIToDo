@@ -38,3 +38,5 @@ node_modules/
 # Docker-specific (if you have multiple Dockerfiles/contexts)
 Dockerfile*
 docker-compose*.yml
+
+test.db

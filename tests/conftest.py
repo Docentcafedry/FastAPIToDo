@@ -97,6 +97,7 @@ async def create_user():
         role="admin",
     )
     db = session_test()
+    print(db)
     db.add(user)
     await db.commit()
 
@@ -105,5 +106,6 @@ async def create_user():
 async def create_todo():
     todo: Todo = Todo(name="String", description="test todo", priority=2, owner_id=1)
     db = session_test()
+    print(db)
     db.add(todo)
     await db.commit()
