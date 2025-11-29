@@ -52,11 +52,7 @@ async def test_get_token(session, create_user):
     user_obtain_jwt = client.post(
         "/auth/token", data={"username": "string1", "password": "123456"}
     )
-<<<<<<< HEAD
 
-=======
-    print(user_obtain_jwt)
->>>>>>> e361a44075854025d5506dabcac42ad2c3a01317
     assert user_obtain_jwt.status_code == 201
 
 
