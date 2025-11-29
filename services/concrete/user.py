@@ -62,8 +62,6 @@ class UserService(UserServiceInterface):
             raise HTTPException(status_code=401, detail="Bad credentials")
 
         payload = {"username": user.username, "id": user.id, "role": user.role}
-        print(payload)
-        print(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"), os.getenv("DATABASE_URL"))
 
         access_token_expires = timedelta(
             minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
