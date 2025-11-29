@@ -65,7 +65,7 @@ class UserService(UserServiceInterface):
         print(payload)
 
         access_token_expires = timedelta(
-            minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES") or "30")
+            minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
         )
         print(access_token_expires)
         access_token = create_access_token(
