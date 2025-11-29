@@ -54,6 +54,7 @@ class UserService(UserServiceInterface):
 
     async def validate_user(self, data: OAuth2PasswordRequestForm) -> Optional[str]:
         user = await self.user_dao.get_user_by_username(username=data.username)
+
         passwords_match = verify_password(data.password, user.password)
         if not passwords_match:
             raise HTTPException(status_code=401, detail="Bad credentials")
@@ -63,6 +64,7 @@ class UserService(UserServiceInterface):
         access_token_expires = timedelta(
             minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
         )
+
         access_token = create_access_token(
             data=payload, expires_delta=access_token_expires
         )

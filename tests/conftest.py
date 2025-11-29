@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 
 from database import get_db_connection
 from depends.auth import get_current_user, get_current_active_user
@@ -97,13 +98,20 @@ async def create_user():
         role="admin",
     )
     db = session_test()
+
     db.add(user)
     await db.commit()
+    await db.flush()
+
+    res = await db.execute(select(User).where(User.username == "string1"))
+    user = res.scalar_one_or_none()
+
 
 
 @pytest_asyncio.fixture(scope="function")
 async def create_todo():
     todo: Todo = Todo(name="String", description="test todo", priority=2, owner_id=1)
     db = session_test()
+    print(db)
     db.add(todo)
     await db.commit()
