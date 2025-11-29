@@ -1,0 +1,58 @@
+[33m740597b[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m Merge branch 'main' of https://github.com/Docentcafedry/FastAPIToDo
+[33m2ed94cb[m 11
+[33m91352b1[m Update ci.yml
+[33m1a51a13[m 10
+[33m49e1548[m 9
+[33md391b49[m 8
+[33m0668674[m 7
+[33mb497398[m 6
+[33m71f9f6d[m 5
+[33m8c81fff[m 4
+[33mcd39def[m 3
+[33m02a8e34[m 2
+[33m4623396[m 1
+[33mfbcdb0f[m dsadsadas
+[33m8cc6651[m Update ci.yml
+[33mbec744e[m dsadsa
+[33m936bf1c[m Update ci.yml
+[33m7fffe6d[m test4
+[33mdf0d2c8[m Update ci.yml
+[33m6af9e65[m test3
+[33m3e4ee68[m Update ci.yml
+[33me4b3e37[m test
+[33me4d1c30[m Update ci.yml
+[33m1944686[m add com
+[33m727d370[m Update ci.yml
+[33m868c9d4[m fixed
+[33md07cc19[m Merge branch 'main' of https://github.com/Docentcafedry/FastAPIToDo
+[33md8c3607[m fixed with git env var
+[33me0ccf82[m Update ci.yml
+[33m289d4fd[m remove setting file from gitignore
+[33m1ac57dd[m test ci comment database file
+[33m7367a65[m Create ci.yml
+[33mbafe765[m fixed frontend error bug with  updating todo
+[33m67978e7[m implemented containerization&&fixed alembic to async attitude
+[33m8808d65[m[33m ([m[1;32mdev[m[33m)[m .
+[33m77b9e2e[m[33m ([m[1;31morigin/dev[m[33m)[m implemented todo admin service in handlers as dependency and fixed tests
+[33ma22c994[m implemented todo admin service
+[33m0953568[m fixed tests for user and auth
+[33mb318bc9[m implemeted user service to auth routes
+[33m1de6e96[m implemented user service
+[33m980f451[m implemented user dao
+[33m01b1e8f[m implemented todos test cases
+[33mb4c4f1b[m imp;emented first todos test case and fixed conftest file for async operations
+[33m6842e7c[m fixed delete todo enpoint and fixed propagation bug during delete todo form template
+[33m817437e[m created current user from cookies dependency
+[33m3efe29a[m implemented update, delete service functionality/fixed some bugs with templates
+[33m0850941[m fixed update page endpoint
+[33m0c64c26[m implemented service in creating and retriewing todos
+[33m536ec7b[m implemented data access object layer and service layers for todo/implemented custom exceptions
+[33m3c53e8f[m formatted code
+[33m9340993[m fixed logout button view bug
+[33m1de8f0f[m fixed bugs with updating?deleting todo/implemented logout functionality
+[33m0a1479e[m implemented templates for signing up, logging in and todos inspection
+[33m8da49c1[m implemented test for auth, admin, users routes
+[33mc2a0b68[m implemented test conf file and created first route test with pytest
+[33m7d25da3[m implemented test conf file and created first route test with pytest
+[33m762a45b[m added number row to the user's model & implemented db migrations with alembic & created users change number route
+[33m6014e47[m late commit && made some changes in project structure and implemented dependencies & admin routes

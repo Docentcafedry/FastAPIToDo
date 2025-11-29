@@ -62,16 +62,13 @@
             is_done: data.complete === "on"
         };
 
-        console.log(payload)
 
         try {
             const token = getCookie('access_token');
-            console.log(token)
             if (!token) {
                 throw new Error('Authentication token not found');
             }
 
-            console.log(`${todoId}`)
 
             const response = await fetch(`/todos/update/${todoId}/?token=${getCookie('access_token')}`, {
                 method: 'PUT',
@@ -87,7 +84,8 @@
             } else {
                 // Handle error
                 const errorData = await response.json();
-                alert(`Error: ${errorData.detail}`);
+                console.log(errorData)
+                alert(`Error: ${errorData.errors[0].details}`);
             }
         } catch (error) {
             console.error('Error:', error);

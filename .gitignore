@@ -21,7 +21,6 @@ venv
 docs.zip
 archive.zip
 .env
-settings.py
 
 # vim temporary files
 *~
